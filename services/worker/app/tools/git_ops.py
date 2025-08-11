@@ -22,18 +22,31 @@ def with_checkout(repoRef:str):
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-def push_branch_and_open_pr(ctx, jobId, patch_text:str):
-    # apply patch
-    p = subprocess.Popen(["git","apply","-"], cwd=ctx.repo_dir, stdin=subprocess.PIPE, text=True)
-    p.communicate(patch_text); assert p.returncode == 0
+def apply_patch(repo_dir: str, patch_text: str):
+    """Apply a unified diff patch to the repository working tree."""
+    p = subprocess.Popen([
+        "git",
+        "apply",
+        "-"
+    ], cwd=repo_dir, stdin=subprocess.PIPE, text=True)
+    p.communicate(patch_text)
+    if p.returncode != 0:
+        raise subprocess.CalledProcessError(p.returncode, "git apply")
 
+
+def push_branch_and_open_pr(ctx, jobId):
     branch_name = f"auto/{jobId[:8]}"
-    subprocess.check_call(["git","checkout","-b",branch_name], cwd=ctx.repo_dir)
-    subprocess.check_call(["git","add","-A"], cwd=ctx.repo_dir)
-    subprocess.check_call(["git","commit","-m",f"feat: auto changes for job {jobId}"], cwd=ctx.repo_dir)
+    subprocess.check_call(["git", "checkout", "-b", branch_name], cwd=ctx.repo_dir)
+    subprocess.check_call(["git", "add", "-A"], cwd=ctx.repo_dir)
+    subprocess.check_call([
+        "git",
+        "commit",
+        "-m",
+        f"feat: auto changes for job {jobId}"
+    ], cwd=ctx.repo_dir)
 
     # push (PATではなくGitHub Appの短命トークンに置換)
-    subprocess.check_call(["git","push","origin",branch_name], cwd=ctx.repo_dir)
+    subprocess.check_call(["git", "push", "origin", branch_name], cwd=ctx.repo_dir)
 
     # PR作成は gh CLI または GitHub API で（疑似）
     pr_url = f"https://github.com/{ctx.owner_repo}/pull/new/{branch_name}"
