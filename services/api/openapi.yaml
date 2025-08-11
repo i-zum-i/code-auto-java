@@ -1,1 +1,79 @@
 # OpenAPI spec placeholder
+openapi: 3.0.3
+info:
+  title: Code-Auto-Implement API
+  version: 1.0.0
+servers:
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/prod
+    variables:
+      apiId:
+        default: your-api-id
+      region:
+        default: ap-northeast-1
+paths:
+  /jobs:
+    post:
+      summary: Create a new async implementation job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repoRef, instruction]
+              properties:
+                repoRef:
+                  type: string
+                  example: "github:owner/repo#main:subdir/path"
+                instruction:
+                  type: string
+                  example: "SearchControllerのデバッグ情報をJSONシリアライズ可能に修正し、単体テスト追加"
+                callbackUrl:
+                  type: string
+                  format: uri
+                userId:
+                  type: string
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId: { type: string }
+  /jobs/{jobId}:
+    get:
+      summary: Get job status
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId: { type: string }
+                  status:
+                    type: string
+                    enum: [queued, running, testing, pr-open, succeeded, failed, cancelled]
+                  prUrl: { type: string }
+                  startedAt: { type: string, format: date-time }
+                  finishedAt: { type: string, format: date-time }
+                  summary: { type: string }
+  /jobs/{jobId}:cancel:
+    post:
+      summary: Cancel a running job (best-effort)
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "202":
+          description: Cancellation requested

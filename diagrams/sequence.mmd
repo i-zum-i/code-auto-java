@@ -1,1 +1,95 @@
 %% Mermaid sequence diagram placeholder
+sequenceDiagram
+    autonumber
+    %% == Participants ==
+    actor U as User (Frontend)
+    participant FE as Frontend (Web/App)
+    participant API as Backend API (Lambda/API GW)
+    participant DDB as DynamoDB (jobs)
+    participant Q as SQS (jobs.fifo)
+    participant W as Worker (ECS Fargate Container)
+    participant SEC as Secrets Manager
+    participant GHAPP as GitHub App (Auth)
+    participant GIT as GitHub Repo
+    participant CC as Claude Code SDK (Anthropic)
+    participant CI as GitHub Actions (PR CI)
+    participant CB as Callback URL (optional)
+
+    %% == Submit ==
+    U->>FE: 対象リポジトリ・指示を入力
+    FE->>API: POST /jobs {repoRef, instruction, callbackUrl?}
+    API->>DDB: PutItem(jobId, status=queued, payload)
+    API->>Q: SendMessage(jobId)
+    API-->>FE: 202 Accepted {jobId}
+    FE-->>U: jobId表示・進捗ポーリング開始
+
+    %% == Worker picks ==
+    Q-->>W: Receive(jobId)
+    W->>DDB: Update(status=running, startedAt)
+
+    %% == Secrets & Auth ==
+    W->>SEC: GetSecret(CLAUDE_API_KEY)
+    W->>GHAPP: App JWT→Installation Token (owner/repo)
+    GHAPP-->>W: 短命インストールトークン
+
+    %% == Repo checkout ==
+    W->>GIT: shallow fetch + sparse-checkout (branch/subdir)
+    GIT-->>W: Working copy
+
+    %% == Context build & prompt ==
+    W->>W: Javaプロジェクト検出 (pom.xml/gradle) / 対象ファイル抽出
+    W->>CC: 指示 + 対象ファイル一覧 → 変更計画とdiff生成
+    CC-->>W: PLAN + Unified Diff
+
+    %% == Apply + CI (pre) ==
+    W->>W: パッチ適用・ローカルビルド/テスト (Maven/Gradle)
+    alt Build/Test OK
+        W->>GIT: 新規ブランチ push (x-access-token)
+        W->>GIT: Draft PR 作成 (REST API)
+        GIT-->>W: PR URL
+        W->>DDB: Update(status=pr-open, prUrl, summary=PLAN, finishedAt)
+        opt callbackUrl provided
+            W->>CB: POST {jobId, status=pr-open, prUrl, summary}
+        end
+    else Build/Test NG
+        W->>GIT: 新規ブランチ push & Draft PR (失敗ログ添付)
+        GIT-->>W: PR URL
+        W->>DDB: Update(status=pr-open, prUrl, summary="CI failed (local)")
+        opt callbackUrl provided
+            W->>CB: POST {jobId, status=pr-open, prUrl, summary}
+        end
+    end
+    W->>Q: DeleteMessage
+
+    %% == External CI on PR ==
+    GIT-->>CI: PR opened (trigger)
+    CI->>GIT: Build/Test/Lint
+    alt CI Success
+        CI->>GIT: ✅ Checks pass
+        note right of GIT: ルールによりReady/Auto-Merge可
+        GIT->>DDB: (optional) Update status=succeeded via webhook processor
+        opt callbackUrl provided
+            GIT->>CB: (optional) POST {jobId, status=succeeded}
+        end
+    else CI Failure
+        CI->>GIT: ❌ Checks failed (コメント/アノテーション)
+        GIT->>DDB: (optional) Update status=failed via webhook processor
+        opt callbackUrl provided
+            GIT->>CB: (optional) POST {jobId, status=failed}
+        end
+    end
+
+    %% == User checks progress ==
+    loop 2-5s polling (or SSE/WS)
+        FE->>API: GET /jobs/{jobId}
+        API-->>FE: {status, prUrl?, summary?}
+    end
+    FE-->>U: ステータス/PRリンク/要約表示
+
+    %% == Cancel (optional) ==
+    rect rgb(255,245,230)
+    U->>FE: Cancel job
+    FE->>API: POST /jobs/{jobId}:cancel
+    API->>DDB: Update(status=cancelled)
+    API-->>FE: 202 {status=cancelled}
+    end
