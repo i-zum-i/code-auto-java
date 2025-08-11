@@ -1,1 +1,114 @@
-<drawio xml placeholder>
+<mxfile host="app.diagrams.net" modified="2025-08-11T05:25:00.000Z" agent="5.0 (Windows)" version="20.8.16" editor="www.draw.io">
+  <diagram id="aws-system-architecture" name="AWS System Architecture">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Frontend -->
+        <mxCell id="fe" value="Frontend (Web/App)" style="shape=rect;rounded=1;fillColor=#fff7e6;strokeColor=#ff9900;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- API Gateway -->
+        <mxCell id="apigw" value="API Gateway&#xa;(HTTP API)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="260" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Lambda -->
+        <mxCell id="lambda" value="Backend API&#xa;(Lambda)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="440" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- DynamoDB -->
+        <mxCell id="ddb" value="DynamoDB (Jobs)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="640" y="20" width="160" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- SQS -->
+        <mxCell id="sqs" value="SQS (jobs.fifo)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="640" y="80" width="160" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ECS Fargate Worker -->
+        <mxCell id="fargate" value="ECS Fargate Worker&#xa;(Claude Code Runner)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="840" y="60" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Secrets Manager -->
+        <mxCell id="sm" value="Secrets Manager&#xa;(Claude API Key, GitHub App Key)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="20" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- S3 -->
+        <mxCell id="s3" value="S3 (Artifacts/Logs)" style="shape=rect;rounded=1;fillColor=#f0f7ff;strokeColor=#1a73e8;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="80" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- GitHub Repo -->
+        <mxCell id="gh" value="GitHub Repo" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777777;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="840" y="160" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- GitHub App -->
+        <mxCell id="ghapp" value="GitHub App Auth" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777777;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="160" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Claude Code SDK -->
+        <mxCell id="cc" value="Claude Code SDK&#xa;(Anthropic API)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777777;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="220" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- GitHub Actions -->
+        <mxCell id="ci" value="GitHub Actions&#xa;(PR CI)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777777;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="840" y="220" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Callback URL -->
+        <mxCell id="cb" value="Callback URL (optional)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777777;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="640" y="220" width="160" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" edge="1" parent="1" source="fe" target="apigw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="apigw" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="lambda" target="ddb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="lambda" target="sqs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="sqs" target="fargate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="fargate" target="sm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="fargate" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="fargate" target="gh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="fargate" target="ghapp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="fargate" target="cc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="gh" target="ci">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="lambda" target="cb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

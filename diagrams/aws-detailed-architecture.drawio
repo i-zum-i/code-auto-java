@@ -1,1 +1,188 @@
-<drawio detailed xml placeholder>
+<mxfile host="app.diagrams.net" modified="2025-08-11T06:15:00.000Z" agent="5.0 (Mac)" version="20.8.16" editor="www.draw.io">
+  <diagram id="aws-detailed-architecture" name="AWS Detailed Architecture">
+    <mxGraphModel dx="1474" dy="887" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ======= LEFT (Clients & API GW) ======= -->
+        <mxCell id="fe" value="Frontend (Web/App)" style="shape=rect;rounded=1;fillColor=#fff7e6;strokeColor=#ff9900;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="apigw" value="API Gateway&#xa;(HTTP API, Public)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="220" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ======= VPC FRAME ======= -->
+        <mxCell id="vpc" value="VPC" style="shape=swimlane;rounded=1;horizontal=0;fillColor=#f5f5f5;strokeColor=#888;swimlaneFillColor=#ffffff;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="460" y="60" width="1180" height="720" as="geometry"/>
+        </mxCell>
+
+        <!-- IGW / NAT (Public Subnet) -->
+        <mxCell id="subnetPub" value="Public Subnet" style="shape=swimlane;rounded=0;horizontal=0;fillColor=#ffffff;strokeColor=#b0bec5;fontSize=12;" vertex="1" parent="vpc">
+          <mxGeometry x="20" y="20" width="1140" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="igw" value="Internet Gateway" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#607d8b;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetPub">
+          <mxGeometry x="20" y="30" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="natgw" value="NAT Gateway" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#607d8b;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetPub">
+          <mxGeometry x="200" y="30" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Private Subnet A -->
+        <mxCell id="subnetA" value="Private Subnet A" style="shape=swimlane;rounded=0;horizontal=0;fillColor=#ffffff;strokeColor=#b0bec5;fontSize=12;" vertex="1" parent="vpc">
+          <mxGeometry x="20" y="160" width="560" height="520" as="geometry"/>
+        </mxCell>
+        <mxCell id="lambda" value="Backend API (Lambda in VPC)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetA">
+          <mxGeometry x="20" y="30" width="200" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ecs" value="ECS Fargate Service&#xa;(Worker: Claude Code Runner)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetA">
+          <mxGeometry x="250" y="30" width="270" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- VPC Interface Endpoints in Subnet A -->
+        <mxCell id="vpceSQS" value="VPC Endpoint (Interface)&#xa;com.amazonaws.${region}.sqs" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetA">
+          <mxGeometry x="20" y="120" width="220" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="vpceSM" value="VPC Endpoint (Interface)&#xa;com.amazonaws.${region}.secretsmanager" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetA">
+          <mxGeometry x="260" y="120" width="260" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="vpceECRAPI" value="VPC Endpoint (Interface)&#xa;com.amazonaws.${region}.ecr.api" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetA">
+          <mxGeometry x="20" y="180" width="220" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="vpceECRDKR" value="VPC Endpoint (Interface)&#xa;com.amazonaws.${region}.ecr.dkr" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetA">
+          <mxGeometry x="260" y="180" width="260" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="vpceLogs" value="VPC Endpoint (Interface)&#xa;com.amazonaws.${region}.logs" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetA">
+          <mxGeometry x="20" y="240" width="220" height="48" as="geometry"/>
+        </mxCell>
+
+        <!-- Private Subnet B -->
+        <mxCell id="subnetB" value="Private Subnet B" style="shape=swimlane;rounded=0;horizontal=0;fillColor=#ffffff;strokeColor=#b0bec5;fontSize=12;" vertex="1" parent="vpc">
+          <mxGeometry x="600" y="160" width="560" height="520" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="S3 (Artifacts/Logs)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="20" y="30" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ddb" value="DynamoDB (Jobs)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="240" y="30" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sqs" value="SQS (jobs.fifo)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="460" y="30" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sm" value="Secrets Manager" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ecr" value="ECR (Worker Image)" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="240" y="100" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cw" value="CloudWatch Logs / Events" style="shape=rect;rounded=1;fillColor=#e8f0fe;strokeColor=#1a73e8;whiteSpace=wrap;fontSize=12;" vertex="1" parent="subnetB">
+          <mxGeometry x="460" y="100" width="200" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Gateway Endpoints (S3 & DynamoDB) -->
+        <mxCell id="vpceS3gw" value="VPC Endpoint (Gateway)&#xa;S3" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetB">
+          <mxGeometry x="20" y="170" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="vpceDDBgw" value="VPC Endpoint (Gateway)&#xa;DynamoDB" style="shape=rect;rounded=1;fillColor=#ffffff;strokeColor=#9e9e9e;whiteSpace=wrap;fontSize=11;" vertex="1" parent="subnetB">
+          <mxGeometry x="240" y="170" width="200" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ======= RIGHT (External Services) ======= -->
+        <mxCell id="github" value="GitHub Repo" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="220" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ghapp" value="GitHub App (Auth)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="280" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="anthropic" value="Claude Code SDK&#xa;(Anthropic API)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="340" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci" value="GitHub Actions&#xa;(PR CI)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="400" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="callback" value="Callback URL (optional)" style="shape=rect;rounded=1;fillColor=#f9f9f9;strokeColor=#777;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="460" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- ======= CONNECTORS ======= -->
+        <!-- Client -> API GW -->
+        <mxCell id="edge1" edge="1" parent="1" source="fe" target="apigw" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- API GW -> Lambda (Private integration) -->
+        <mxCell id="edge2" edge="1" parent="1" source="apigw" target="lambda" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="250" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda -> SQS / DDB -->
+        <mxCell id="edge3" edge="1" parent="1" source="lambda" target="sqs" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="lambda" target="ddb" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Worker consume SQS -->
+        <mxCell id="edge5" edge="1" parent="1" source="sqs" target="ecs" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Worker -> Secrets / S3 / ECR / Logs -->
+        <mxCell id="edge6" edge="1" parent="1" source="ecs" target="sm" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge7" edge="1" parent="1" source="ecs" target="s3" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge8" edge="1" parent="1" source="ecs" target="ecr" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge9" edge="1" parent="1" source="ecs" target="cw" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ECS/Lambda egress via NAT to Internet (GitHub/Anthropic) -->
+        <mxCell id="edgeNat1" edge="1" parent="1" source="ecs" target="natgw" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edgeNat2" edge="1" parent="1" source="lambda" target="natgw" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edgeNat3" edge="1" parent="1" source="natgw" target="igw" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Internet targets -->
+        <mxCell id="edgeGit" edge="1" parent="1" source="igw" target="github" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edgeGhApp" edge="1" parent="1" source="igw" target="ghapp" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edgeAnth" edge="1" parent="1" source="igw" target="anthropic" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- PR triggers CI -->
+        <mxCell id="edgeCI" edge="1" parent="1" source="github" target="ci" style="endArrow=block;strokeColor=#555;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Optional callback from Lambda/API to external URL -->
+        <mxCell id="edgeCB" edge="1" parent="1" source="lambda" target="callback" style="dashed=1;endArrow=block;strokeColor=#777;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Notes -->
+        <mxCell id="note1" value="Private subnets use VPC Endpoints for AWS services.&#xa;Internet egress (GitHub/Anthropic) goes via NAT GW." style="shape=note;whiteSpace=wrap;fillColor=#FFFF88;strokeColor=#B29500;fontSize=11;" vertex="1" parent="vpc">
+          <mxGeometry x="860" y="20" width="300" height="80" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
