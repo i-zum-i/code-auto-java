@@ -1,7 +1,7 @@
 # Worker implementation placeholder
 import os, json, time, subprocess, tempfile, shutil
 import boto3
-from tools.git_ops import with_checkout, push_branch_and_open_pr
+from tools.git_ops import with_checkout, push_branch_and_open_pr, apply_patch
 from tools.context_extract import build_min_context
 from tools.ci_runner import run_ci
 from tools.claude_client import plan_and_apply
@@ -53,9 +53,11 @@ def main():
                         target_files=target_files,
                         claude_api_key=claude_key
                     )
-                    stage = run_ci(ctx.repo_dir)   # build/test/lint
+                    # Apply patch before running CI so tests run against new code
+                    apply_patch(ctx.repo_dir, patch)
+                    stage = run_ci(target_files["project_root"])   # build/test/lint
 
-                    branch, pr_url = push_branch_and_open_pr(ctx, jobId, patch)
+                    branch, pr_url = push_branch_and_open_pr(ctx, jobId)
 
                 update_status(jobId, status="pr-open", prUrl=pr_url, summary=plan)
                 # 後段でCIが通れば succeeded（別ルートでアップデート）
